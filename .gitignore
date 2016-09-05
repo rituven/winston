@@ -90,3 +90,7 @@ ENV/
 
 #set environment values
 .env
+
+
+recording.wav
+response.mp3
