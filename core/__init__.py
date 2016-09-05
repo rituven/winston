@@ -3,3 +3,4 @@ from .Listener import Listener
 from .Exceptions import ServiceCommunicationError
 from .Base import BaseApp
 from .Events import Events
+from .Utils import HandlerTuple

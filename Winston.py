@@ -4,15 +4,17 @@ from PyQt4.QtGui import *
 from PyQt4.QtCore import *
 from core.Messenger import *
 from core.Events import *
+from alexa import AlexaService
 
 class QTApp(QWidget):
  
     def __init__(self):
-        super().__init__()
+        super(QWidget, self).__init__()
         self.title = 'Winston'
         self.setWindowTitle(self.title)
         self.setGeometry(100,100,800,400)
         self.btn = QPushButton('', self)
+        self.alexaService = AlexaService()
         self.messenger = getMessenger()
         self.initUI()
  
@@ -36,7 +38,6 @@ class QTApp(QWidget):
         sending_button = self.sender()
         data = {'App': str(sending_button.objectName())}
         self.messenger.postEvent(Events.UI_BTN_CLICKED, data)
-        print('clicked')
  
     @pyqtSlot()
     def on_press(self):
@@ -45,7 +46,6 @@ class QTApp(QWidget):
         self.btn.setIcon(QIcon('media/Alexa_active.jpg'))
         self.btn.setCheckable(False);
         self.messenger.postEvent(Events.UI_BTN_PRESSED, data)
-        print('pressed')
  
     @pyqtSlot()
     def on_release(self):
@@ -53,11 +53,12 @@ class QTApp(QWidget):
         data = {'App': str(sending_button.objectName())}
         self.btn.setIcon(QIcon('media/Alexa_passive.jpg'))
         self.btn.setCheckable(True);
-       self.messenger.postEvent(messenger, Events.UI_BTN_RELEASED, data)
-        print('released')
+        self.messenger.postEvent(Events.UI_BTN_RELEASED, data)
  
 if __name__ == '__main__':
     app = QApplication(sys.argv)
     ex = QTApp()
-    sys.exit(app.exec_())
+    app.exec_()
+    delMessenger()
+    sys.exit()
 
