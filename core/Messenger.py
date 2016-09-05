@@ -47,9 +47,9 @@ class _Messenger(threading.Thread):
             self.listeners.remove(listener)
         self.__pauseThread.clear()
 
-    def postEvent(self, evt):
+    def postEvent(self, evt, data=None):
         try:
-            self.__msgQueue.put_nowait(evt)
+            self.__msgQueue.put_nowait((evt, data))
         except queue.Full:
             logging.exception('Unable to post event because queue is full')
 
@@ -63,23 +63,38 @@ class _Messenger(threading.Thread):
         """
         while not self.__stopThread.is_set():
             if not self.__pauseThread.is_set():
-                evt = self.__msgQueue.get()
-                if evt:
-                    with self.__lock:
-                        handlers = self.dispatcher.get(evt, None)
-                        if handlers:
-                            for handler in handlers:
-                                try:
-                                    handler.func(*handler.args,
-                                                 **handler.kwargs)
-                                except:
-                                    logging.exception('Could not execute' \
-                                            'callback handler {} with args: {}' \
-                                            'and kwargs: {}'.format(
-                                                                handler.func,
-                                                                handler.args,
-                                                                handler.kwargs
-                                                                ))
+                try:
+                    msg = self.__msgQueue.get_nowait()
+                    if msg:
+                        evt, data = msg
+                        with self.__lock:
+                            handlers = self.dispatcher.get(evt, None)
+                            if handlers:
+                                for handler in handlers:
+                                    if data:
+                                        data = [data]
+                                    else:
+                                        data = []
+                                    if handler.args:
+                                        args = data + handler.args
+                                    else:
+                                        args = data
+                                    if handler.kwargs:
+                                        kwargs = handler.kwargs
+                                    else:
+                                        kwargs = {}
+                                    try:
+                                        handler.func(*args, **kwargs)
+                                    except Exception as e:
+                                        logging.exception('Could not execute' \
+                                                'callback handler {} with args: {}' \
+                                                ' and kwargs: {}'.format(
+                                                                    handler.func,
+                                                                    handler.args,
+                                                                    handler.kwargs
+                                                                    ))
+                except queue.Empty:
+                    pass
 
 
 
@@ -93,6 +108,7 @@ def initMessenger():
    global MessengerInstance
    if not MessengerInstance:
        MessengerInstance = _Messenger()
+       MessengerInstance.start()
 
 def getMessenger():
    """
