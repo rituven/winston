@@ -23,13 +23,9 @@ BEEP_WAV = os.path.join(MEDIA_PATH, 'beep.wav')
 class AlexaService(BaseApp):
     def __init__(self):
         self.checkInternetConn()
-        btnPressedHandler = HandlerTuple(self.btnPressed, None, None)
-        btnReleasedHandler = HandlerTuple(self.btnReleased, None, None)
         btnClickedHandler = HandlerTuple(self.btnClicked, None, None)
-        evtDict = { Events.UI_BTN_PRESSED: btnPressedHandler,
-                         Events.UI_BTN_RELEASED: btnReleasedHandler}
+        evtDict = { Events.UI_BTN_CLICKED: btnClickedHandler}
         self.listener = Listener(evtDict)
-        #self.listener = Listener({Events.UI_BTN_CLICKED: btnClickedHandler})
         self.messenger = getMessenger()
         self.accessTokenTimeStamp = 0
         self.accessToken = None
