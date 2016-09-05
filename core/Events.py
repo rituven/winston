@@ -1,5 +1,4 @@
-from enum import Enum
-class Events(Enum):
+class Events(object):
     """
     Events Enum
     """
