@@ -47,7 +47,7 @@ class _Messenger(threading.Thread):
             self.listeners.remove(listener)
         self.__pauseThread.clear()
 
-    def postEvent(self, evt, data):
+    def postEvent(self, evt, data=None):
         try:
             self.__msgQueue.put_nowait((evt, data))
         except queue.Full:

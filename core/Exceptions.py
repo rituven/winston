@@ -1,0 +1,2 @@
+class ServiceCommunicationError(Exception):
+    pass
