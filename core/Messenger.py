@@ -1,5 +1,5 @@
 import threading
-import queue
+import Queue
 import logging
 
 
@@ -8,13 +8,13 @@ class _Messenger(threading.Thread):
     Messenger class which services listeners with events.
     """
     def __init__(self):
-        super().__init__()
+        threading.Thread.__init__(self)
         self.dispatcher = {}
         self.listeners = []
         self.__lock = threading.RLock()
         self.__pauseThread = threading.Event()
         self.__stopThread = threading.Event()
-        self.__msgQueue = queue.Queue()
+        self.__msgQueue = Queue.Queue()
 
     def subscribe(self, listener):
         """
@@ -50,7 +50,7 @@ class _Messenger(threading.Thread):
     def postEvent(self, evt, data=None):
         try:
             self.__msgQueue.put_nowait((evt, data))
-        except queue.Full:
+        except Queue.Full:
             logging.exception('Unable to post event because queue is full')
 
     def stop(self):
@@ -66,6 +66,7 @@ class _Messenger(threading.Thread):
                 try:
                     msg = self.__msgQueue.get_nowait()
                     if msg:
+                        self.__msgQueue.task_done()
                         evt, data = msg
                         with self.__lock:
                             handlers = self.dispatcher.get(evt, None)
@@ -93,7 +94,7 @@ class _Messenger(threading.Thread):
                                                                     handler.args,
                                                                     handler.kwargs
                                                                     ))
-                except queue.Empty:
+                except Queue.Empty:
                     pass
 
 
